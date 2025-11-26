@@ -3,8 +3,8 @@ import { FaHeart, FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 // Import video files here
-import video2 from "../assets/vivek.mp4";
-import videoI from "../assets/vivek.mp4";
+import video2 from "../assets/Viral.mp4";
+import videoI from "../assets/Viral.mp4";
 
 const VideoStreamingPlatform = () => {
   const categories = [
@@ -22,7 +22,7 @@ const VideoStreamingPlatform = () => {
   const [videos, setVideos] = useState([
     {
       id: 1,
-      title: "Vivek Special Video - Amazing Gaming Moments",
+      title: "desi girl viral sex",
       category: "Teen",
       videoUrl: videoI,
       views: "1.4M",
@@ -437,5 +437,6 @@ const VideoStreamingPlatform = () => {
     </div>
   );
 };
+
 
 export default VideoStreamingPlatform;
