@@ -1,209 +1,820 @@
-import React from 'react'; 
-import { FaEnvelope, FaPhone, FaComments, FaLaughBeam, FaGrinTongueWink, FaFire } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
 
-const Contact = () => {
-  return (
-    <div className="py-8 bg-gradient-to-br from-orange-50 to-pink-50 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl p-6 md:p-8 shadow-2xl border-2 border-yellow-300">
-        <h2 className="text-2xl md:text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 border-b-2 border-dotted border-pink-300 pb-3">
-          🐹 Contact Hamaster - The Meme Masters!
-        </h2>
+const LudoGame = () => {
+  // Game states
+  const [players, setPlayers] = useState([
+    { id: 1, name: 'Black', color: '#000000', position: 0, tokens: [0, 0, 0, 0], isActive: true },
+    { id: 2, name: 'Pink', color: '#FF69B4', position: 0, tokens: [0, 0, 0, 0], isActive: false },
+    { id: 3, name: 'Purple', color: '#9370DB', position: 0, tokens: [0, 0, 0, 0], isActive: false },
+    { id: 4, name: 'Gray', color: '#808080', position: 0, tokens: [0, 0, 0, 0], isActive: false },
+    { id: 5, name: 'White', color: '#FFFFFF', position: 0, tokens: [0, 0, 0, 0], isActive: false },
+  ]);
+  
+  const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [diceValue, setDiceValue] = useState(0);
+  const [gameLog, setGameLog] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [selectedToken, setSelectedToken] = useState(null);
+  const [gameMessage, setGameMessage] = useState('Roll the dice to start! Black player begins.');
 
-        <p className="text-gray-700 mb-8 leading-relaxed text-lg font-medium">
-          Got a hilarious meme idea? Need emergency funny content? Spotted a meme that made you LOL too hard? 
-          Our meme support team is here 24/7 to handle all your funny business! 🎭
-        </p>
+  // Board configuration
+  const boardSize = 15;
+  const totalCells = 56;
+  const safeCells = [0, 8, 13, 21, 26, 34, 39, 47];
+  const winningCells = {
+    1: [52, 53, 54, 55, 56],
+    2: [12, 11, 10, 9, 8],
+    3: [22, 23, 24, 25, 26],
+    4: [38, 37, 36, 35, 34],
+    5: [48, 49, 50, 51, 52],
+  };
 
-        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-100 to-pink-100 rounded-xl border border-orange-200">
-          <p className="text-center font-bold text-lg text-purple-700">
-            ⚡ Warning: Excessive laughter may occur when contacting us! ⚡
-          </p>
-        </div>
+  // Roll the dice
+  const rollDice = () => {
+    if (diceValue !== 0 && selectedToken === null) {
+      setGameMessage(`You rolled ${diceValue}. Select a token to move!`);
+      return;
+    }
+    
+    const roll = Math.floor(Math.random() * 6) + 1;
+    setDiceValue(roll);
+    
+    // Save current state to history before making changes
+    saveToHistory();
+    
+    const playerName = players[currentPlayer].name;
+    setGameLog(prev => [...prev, `${playerName} rolled ${roll}`]);
+    
+    if (roll === 6) {
+      setGameMessage(`${playerName} rolled a 6! You get another turn. Select a token to move or bring a new token out.`);
+    } else {
+      setGameMessage(`${playerName} rolled ${roll}. Select a token to move.`);
+    }
+  };
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <ContactCard 
-            icon={<FaLaughBeam size={28} className="mr-2 text-purple-600" />} 
-            title="Meme Mail"
-            items={[
-              { label: 'General hilarity', value: 'funny@hamaster.com' },
-              { label: 'Meme submissions', value: 'memes@hamaster.com' },
-              { label: 'Dad jokes (emergency)', value: 'dadjokes@hamaster.com' }
-            ]}
-          />
-          
-          <ContactCard 
-            icon={<FaGrinTongueWink size={28} className="mr-2 text-green-600" />} 
-            title="Giggle Hotline"
-            items={[
-              { label: 'LOL Emergency', value: '1-800-LOL-MEMS' },
-              { label: 'International ROFL', value: '+1-555-ROFL-NOW' },
-              { label: 'Prank Calls (we love them!)', value: '1-888-PRANK-ME' }
-            ]}
-          />
-          
-          <ContactCard 
-            icon={<FaComments size={28} className="mr-2 text-blue-600" />} 
-            title="Instant Chuckles"
-            description="Chat with our meme bots for instant laughs!"
-            button="Start LOL Chat"
-            link="https://chat.hamaster.com"
-            emoji="🤖"
-          />
-        </div>
+  // Save current game state to history (for undo)
+  const saveToHistory = () => {
+    const gameState = {
+      players: players.map(player => ({
+        ...player,
+        tokens: [...player.tokens]
+      })),
+      currentPlayer,
+      diceValue,
+      selectedToken,
+      gameLog: [...gameLog]
+    };
+    
+    setHistory(prev => [...prev, gameState]);
+  };
 
-        <h3 className="text-xl md:text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
-          🎪 Send Us Your Funniest Message
-        </h3>
+  // Undo the last move
+  const undoMove = () => {
+    if (history.length === 0) return;
+    
+    const lastState = history[history.length - 1];
+    
+    setPlayers(lastState.players.map(player => ({
+      ...player,
+      tokens: [...player.tokens]
+    })));
+    setCurrentPlayer(lastState.currentPlayer);
+    setDiceValue(lastState.diceValue);
+    setSelectedToken(lastState.selectedToken);
+    setGameLog([...lastState.gameLog]);
+    
+    // Remove the last state from history
+    setHistory(prev => prev.slice(0, prev.length - 1));
+    
+    const playerName = lastState.players[lastState.currentPlayer].name;
+    setGameMessage(`Undo successful. ${playerName}'s turn.`);
+  };
 
-        <form className="space-y-6">
-          <div className="space-y-2">
-            <label className="block font-medium text-gray-800 flex items-center">
-              Your Funny Name <span className="ml-2 text-sm text-gray-500">(Stage name accepted!)</span>
-            </label>
-            <input 
-              type="text" 
-              className="w-full bg-white border-2 border-purple-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
-              placeholder="e.g., Sir Laughs-a-Lot"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block font-medium text-gray-800">Email Address</label>
-            <input 
-              type="email" 
-              className="w-full bg-white border-2 border-pink-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
-              placeholder="your.funny.email@lol.com"
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block font-medium text-gray-800">Your LOL Level</label>
-              <select className="w-full bg-white border-2 border-green-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200">
-                <option value="">How funny are you?</option>
-                <option value="chuckle">Just a Chuckler 😄</option>
-                <option value="lol">Full LOL-er 🤣</option>
-                <option value="rofl">ROFL Master 🤪</option>
-                <option value="dead">Dying of Laughter 💀</option>
-              </select>
-            </div>
+  // Select a token to move
+  const selectToken = (playerIndex, tokenIndex) => {
+    if (playerIndex !== currentPlayer) {
+      setGameMessage("It's not your turn!");
+      return;
+    }
+    
+    if (diceValue === 0) {
+      setGameMessage("Roll the dice first!");
+      return;
+    }
+    
+    setSelectedToken({ playerIndex, tokenIndex });
+    setGameMessage(`Selected ${players[playerIndex].name}'s token ${tokenIndex + 1}. Click on the board to move.`);
+  };
 
-            <div className="space-y-2">
-              <label className="block font-medium text-gray-800">Meme Type</label>
-              <select className="w-full bg-white border-2 border-blue-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
-                <option value="">What's your meme style?</option>
-                <option value="dank">Dank Memes 🌿</option>
-                <option value="wholesome">Wholesome ❤️</option>
-                <option value="dark">Dark Humor 🌚</option>
-                <option value="dad">Dad Jokes 👨</option>
-                <option value="random">Random AF 🎲</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block font-medium text-gray-800">Subject of Your Chuckle</label>
-            <input 
-              type="text" 
-              className="w-full bg-white border-2 border-yellow-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200"
-              placeholder="e.g., 'Help! I can't stop laughing at this meme!'"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="block font-medium text-gray-800">
-              Your Hilarious Message <span className="font-normal text-sm text-gray-500">(Emojis encouraged! 🚀)</span>
-            </label>
-            <textarea 
-              rows="5"
-              className="w-full bg-white border-2 border-orange-200 rounded-xl py-3 px-4 text-gray-800 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-              placeholder="Describe the meme that broke your funny bone, share your joke, or just tell us what's cracking you up..."
-            ></textarea>
-          </div>
-
-          <div className="flex items-center mb-4">
-            <input 
-              type="checkbox" 
-              id="terms" 
-              className="mr-3 w-5 h-5 text-purple-600 rounded focus:ring-purple-500"
-            />
-            <label htmlFor="terms" className="text-gray-700">
-              I promise my message is at least 70% funny (or I'll send a cookie 🍪)
-            </label>
-          </div>
-          
-          <button 
-            type="submit"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-8 rounded-xl font-bold text-lg w-full hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            🚀 Launch My Funny Message!
-          </button>
-        </form>
-
-        <div className="mt-10 pt-6 border-t-2 border-dashed border-gray-300">
-          <div className="flex flex-wrap gap-4 justify-center">
-            <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-              <FaFire className="mx-auto text-2xl text-orange-500 mb-2" />
-              <p className="font-bold text-blue-700">🔥 Hot Meme Line</p>
-              <p className="text-sm text-gray-600">Trending memes only!</p>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-              <span className="text-2xl mb-2 block">🦸</span>
-              <p className="font-bold text-green-700">Meme Rescue Squad</p>
-              <p className="text-sm text-gray-600">Bad day? We fix!</p>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-lg border border-red-200">
-              <span className="text-2xl mb-2 block">😂</span>
-              <p className="font-bold text-red-700">24/7 LOL Guarantee</p>
-              <p className="text-sm text-gray-600">Or your smile back!</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ContactCard = ({ icon, title, items, description, button, link, emoji }) => {
-  return (
-    <div className="bg-gradient-to-b from-white to-gray-50 rounded-2xl p-6 border-2 border-purple-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-      <h3 className="text-lg md:text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 flex items-center">
-        {icon} {title} {emoji && <span className="ml-2">{emoji}</span>}
-      </h3>
+  // Move the selected token
+  const moveToken = (cellIndex) => {
+    if (selectedToken === null || diceValue === 0) {
+      setGameMessage("Select a token first!");
+      return;
+    }
+    
+    const { playerIndex, tokenIndex } = selectedToken;
+    const player = players[playerIndex];
+    const currentPos = player.tokens[tokenIndex];
+    
+    // Check if token can be moved
+    if (currentPos === 0 && diceValue !== 6) {
+      setGameMessage("You need a 6 to bring a token out!");
+      return;
+    }
+    
+    // Calculate new position
+    let newPos;
+    if (currentPos === 0) {
+      // Token is in home, moving to start
+      newPos = 1;
+    } else {
+      newPos = currentPos + diceValue;
       
-      {items && (
-        <div className="space-y-3">
-          {items.map((item, index) => (
-            <div key={index} className="p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <p className="text-gray-600 text-sm font-medium">{item.label}:</p>
-              <p className="text-purple-700 font-bold text-base">{item.value}</p>
+      // Check if token has completed the board
+      if (newPos > totalCells) {
+        setGameMessage("Move not possible - token would exceed board limit!");
+        return;
+      }
+    }
+    
+    // Save to history before making changes
+    saveToHistory();
+    
+    // Check if new position is occupied by opponent
+    const updatedPlayers = [...players];
+    let capturedToken = false;
+    
+    for (let i = 0; i < updatedPlayers.length; i++) {
+      if (i !== playerIndex) {
+        for (let j = 0; j < updatedPlayers[i].tokens.length; j++) {
+          if (updatedPlayers[i].tokens[j] === newPos && !safeCells.includes(newPos)) {
+            // Capture opponent's token (send back to home)
+            updatedPlayers[i].tokens[j] = 0;
+            capturedToken = true;
+            setGameLog(prev => [...prev, `${player.name} captured ${updatedPlayers[i].name}'s token!`]);
+          }
+        }
+      }
+    }
+    
+    // Update player's token position
+    updatedPlayers[playerIndex].tokens[tokenIndex] = newPos;
+    
+    // Check if player has won
+    const isWinningCell = winningCells[player.id]?.includes(newPos);
+    if (isWinningCell && newPos === winningCells[player.id][4]) {
+      setGameLog(prev => [...prev, `${player.name}'s token reached the winning spot!`]);
+    }
+    
+    setPlayers(updatedPlayers);
+    
+    // Reset selection and dice
+    setSelectedToken(null);
+    setDiceValue(0);
+    
+    // Move to next player if dice was not 6
+    if (diceValue !== 6) {
+      const nextPlayer = (currentPlayer + 1) % players.length;
+      setCurrentPlayer(nextPlayer);
+      
+      // Update active status
+      const updatedPlayersWithStatus = updatedPlayers.map((p, idx) => ({
+        ...p,
+        isActive: idx === nextPlayer
+      }));
+      setPlayers(updatedPlayersWithStatus);
+      
+      setGameMessage(`${updatedPlayersWithStatus[nextPlayer].name}'s turn. Roll the dice!`);
+    } else {
+      setGameMessage(`${player.name} rolled a 6! You get another turn.`);
+    }
+  };
+
+  // Render the game board
+  const renderBoard = () => {
+    const board = [];
+    
+    // Create board cells
+    for (let row = 0; row < boardSize; row++) {
+      const rowCells = [];
+      for (let col = 0; col < boardSize; col++) {
+        const cellIndex = row * boardSize + col;
+        
+        // Determine cell type and color
+        let cellClass = "board-cell";
+        let cellStyle = {};
+        let cellText = "";
+        
+        // Home areas
+        if ((row < 6 && col < 6) || (row < 6 && col > 8) || 
+            (row > 8 && col < 6) || (row > 8 && col > 8)) {
+          cellClass += " home-area";
+          
+          // Color the home areas
+          if (row < 6 && col < 6) cellStyle.backgroundColor = '#9370DB'; // Purple
+          else if (row < 6 && col > 8) cellStyle.backgroundColor = '#FF69B4'; // Pink
+          else if (row > 8 && col < 6) cellStyle.backgroundColor = '#000000'; // Black
+          else if (row > 8 && col > 8) cellStyle.backgroundColor = '#808080'; // Gray
+        }
+        
+        // Center safe area (white)
+        if (row >= 6 && row <= 8 && col >= 6 && col <= 8) {
+          cellClass += " center-area";
+          if (row === 7 && col === 7) {
+            cellStyle.backgroundColor = '#FFFFFF';
+            cellStyle.border = '2px solid #000';
+          }
+        }
+        
+        // Main path cells
+        const isMainPath = (
+          (row === 0 && col >= 6 && col <= 8) || // Top
+          (row === 14 && col >= 6 && col <= 8) || // Bottom
+          (col === 0 && row >= 6 && row <= 8) || // Left
+          (col === 14 && row >= 6 && row <= 8)   // Right
+        );
+        
+        if (isMainPath) {
+          cellClass += " main-path";
+          
+          // Color the starting positions
+          if (row === 0 && col === 7) cellStyle.backgroundColor = '#9370DB'; // Purple start
+          else if (row === 14 && col === 7) cellStyle.backgroundColor = '#FF69B4'; // Pink start
+          else if (col === 0 && row === 7) cellStyle.backgroundColor = '#000000'; // Black start
+          else if (col === 14 && row === 7) cellStyle.backgroundColor = '#808080'; // Gray start
+        }
+        
+        // Check if any token is on this cell
+        const tokensInCell = [];
+        players.forEach((player, pIdx) => {
+          player.tokens.forEach((tokenPos, tIdx) => {
+            // Simple mapping of token position to board cell (simplified for demo)
+            if (tokenPos > 0) {
+              // This is a simplified mapping - in a real game, you'd have a proper mapping
+              const mappedRow = 7;
+              const mappedCol = 7 + tokenPos;
+              if (row === mappedRow && col === (mappedCol % boardSize)) {
+                tokensInCell.push({ player, pIdx, tIdx });
+              }
+            }
+          });
+        });
+        
+        rowCells.push(
+          <div 
+            key={cellIndex} 
+            className={cellClass} 
+            style={cellStyle}
+            onClick={() => moveToken(cellIndex)}
+          >
+            {tokensInCell.length > 0 && (
+              <div className="tokens-container">
+                {tokensInCell.map((token, idx) => (
+                  <div 
+                    key={idx}
+                    className="token" 
+                    style={{ backgroundColor: token.player.color }}
+                    title={`${token.player.name} - Token ${token.tIdx + 1}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectToken(token.pIdx, token.tIdx);
+                    }}
+                  >
+                    {token.tIdx + 1}
+                  </div>
+                ))}
+              </div>
+            )}
+            {cellText}
+          </div>
+        );
+      }
+      
+      board.push(
+        <div key={row} className="board-row">
+          {rowCells}
+        </div>
+      );
+    }
+    
+    return board;
+  };
+
+  // Render player tokens in home
+  const renderPlayerTokens = (player, playerIndex) => {
+    return (
+      <div className="player-home" key={playerIndex}>
+        <h4 style={{ color: player.color }}>{player.name}</h4>
+        <div className="tokens-in-home">
+          {player.tokens.map((tokenPos, tokenIndex) => (
+            <div 
+              key={tokenIndex}
+              className={`home-token ${tokenPos === 0 ? 'in-home' : 'on-board'} ${selectedToken?.playerIndex === playerIndex && selectedToken?.tokenIndex === tokenIndex ? 'selected' : ''}`}
+              style={{ backgroundColor: player.color }}
+              onClick={() => selectToken(playerIndex, tokenIndex)}
+              title={`${player.name} - Token ${tokenIndex + 1} (${tokenPos === 0 ? 'In Home' : 'Position: ' + tokenPos})`}
+            >
+              {tokenIndex + 1}
             </div>
           ))}
         </div>
-      )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="ludo-container">
+      <header className="game-header">
+        <h1>Ludo Game</h1>
+        <p className="game-subtitle">5 Players Edition (Black, Pink, Purple, Gray, White)</p>
+      </header>
       
-      {description && (
-        <p className="text-gray-600 mb-4 p-2 bg-yellow-50 rounded-lg italic">{description}</p>
-      )}
-      
-      {button && (
-        link ? (
-          <a 
-            href={link} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-4 rounded-xl font-bold w-full hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+      <div className="game-info">
+        <div className="current-player-info">
+          <div className="current-player" style={{ backgroundColor: players[currentPlayer].color }}>
+            {players[currentPlayer].name}'s Turn
+          </div>
+          <div className="dice-container">
+            <div className="dice">
+              {diceValue > 0 ? diceValue : '?'}
+            </div>
+            <button className="roll-btn" onClick={rollDice}>
+              Roll Dice
+            </button>
+          </div>
+          <div className="game-message">{gameMessage}</div>
+        </div>
+        
+        <div className="controls">
+          <button 
+            className="undo-btn" 
+            onClick={undoMove}
+            disabled={history.length === 0}
           >
-            {button}
-          </a>
-        ) : (
-          <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-4 rounded-xl font-bold w-full hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg">
-            {button}
+            Undo Move
           </button>
-        )
-      )}
+          <div className="history-count">
+            History: {history.length} moves saved
+          </div>
+        </div>
+      </div>
+      
+      <div className="game-area">
+        <div className="board-container">
+          {renderBoard()}
+        </div>
+        
+        <div className="players-sidebar">
+          <h3>Players & Tokens</h3>
+          <div className="players-list">
+            {players.map((player, index) => (
+              <div 
+                key={player.id} 
+                className={`player-info ${player.isActive ? 'active' : ''}`}
+                style={{ borderLeft: `5px solid ${player.color}` }}
+              >
+                <div className="player-header">
+                  <span className="player-name" style={{ color: player.color }}>
+                    {player.name}
+                  </span>
+                  {index === currentPlayer && <span className="current-turn">Current Turn</span>}
+                </div>
+                <div className="player-tokens">
+                  {renderPlayerTokens(player, index)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <div className="game-log">
+        <h3>Game Log</h3>
+        <div className="log-entries">
+          {gameLog.slice().reverse().map((entry, index) => (
+            <div key={index} className="log-entry">
+              {entry}
+            </div>
+          ))}
+          {gameLog.length === 0 && (
+            <div className="log-entry">Game started. Roll the dice!</div>
+          )}
+        </div>
+      </div>
+      
+      <div className="game-rules">
+        <h3>How to Play</h3>
+        <ul>
+          <li>Click "Roll Dice" to roll the dice.</li>
+          <li>If you roll a 6, you get another turn.</li>
+          <li>Click on a token in your home area to select it, then click on a board cell to move.</li>
+          <li>Tokens can only leave home when you roll a 6.</li>
+          <li>Use the "Undo Move" button to undo your last move.</li>
+          <li>The first player to get all tokens to the center wins!</li>
+        </ul>
+      </div>
+      
+      <style jsx="true">{`
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+          background-color: #f5f5f5;
+        }
+        
+        .ludo-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .game-header {
+          text-align: center;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 2px solid #eee;
+        }
+        
+        .game-header h1 {
+          color: #333;
+          font-size: 2.5rem;
+          margin-bottom: 5px;
+        }
+        
+        .game-subtitle {
+          color: #666;
+          font-size: 1.2rem;
+        }
+        
+        .game-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+        }
+        
+        .current-player-info {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+        
+        .current-player {
+          padding: 10px 20px;
+          border-radius: 50px;
+          color: white;
+          font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+          min-width: 150px;
+          text-align: center;
+        }
+        
+        .dice-container {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        
+        .dice {
+          width: 60px;
+          height: 60px;
+          background-color: white;
+          border: 3px solid #333;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2rem;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .roll-btn, .undo-btn {
+          padding: 12px 24px;
+          border: none;
+          border-radius: 6px;
+          font-size: 1rem;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        
+        .roll-btn {
+          background-color: #4CAF50;
+          color: white;
+        }
+        
+        .roll-btn:hover {
+          background-color: #45a049;
+        }
+        
+        .undo-btn {
+          background-color: #f44336;
+          color: white;
+        }
+        
+        .undo-btn:hover:not(:disabled) {
+          background-color: #d32f2f;
+        }
+        
+        .undo-btn:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+        }
+        
+        .game-message {
+          background-color: white;
+          padding: 12px 20px;
+          border-radius: 6px;
+          border-left: 4px solid #2196F3;
+          font-weight: bold;
+          flex-grow: 1;
+          min-width: 300px;
+        }
+        
+        .controls {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          align-items: flex-end;
+        }
+        
+        .history-count {
+          font-size: 0.9rem;
+          color: #666;
+        }
+        
+        .game-area {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .board-container {
+          flex: 3;
+          background-color: #f0f0f0;
+          padding: 10px;
+          border-radius: 8px;
+          border: 3px solid #333;
+        }
+        
+        .board-row {
+          display: flex;
+        }
+        
+        .board-cell {
+          width: 40px;
+          height: 40px;
+          border: 1px solid #ccc;
+          position: relative;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        
+        .board-cell:hover {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .home-area {
+          border: 2px dashed #aaa;
+        }
+        
+        .center-area {
+          background-color: #f9f9f9;
+        }
+        
+        .main-path {
+          background-color: #e8f4f8;
+        }
+        
+        .tokens-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          align-items: center;
+          padding: 2px;
+        }
+        
+        .token {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          margin: 1px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: bold;
+          color: white;
+          text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+          cursor: pointer;
+          border: 1px solid rgba(0, 0, 0, 0.3);
+        }
+        
+        .players-sidebar {
+          flex: 1;
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+        }
+        
+        .players-sidebar h3 {
+          margin-bottom: 15px;
+          color: #333;
+          text-align: center;
+        }
+        
+        .players-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+        
+        .player-info {
+          padding: 10px;
+          background-color: white;
+          border-radius: 6px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .player-info.active {
+          box-shadow: 0 0 0 2px #4CAF50;
+        }
+        
+        .player-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        
+        .player-name {
+          font-weight: bold;
+          font-size: 1.1rem;
+        }
+        
+        .current-turn {
+          background-color: #4CAF50;
+          color: white;
+          font-size: 0.8rem;
+          padding: 2px 8px;
+          border-radius: 10px;
+        }
+        
+        .player-home {
+          margin-top: 5px;
+        }
+        
+        .player-home h4 {
+          margin-bottom: 5px;
+        }
+        
+        .tokens-in-home {
+          display: flex;
+          gap: 8px;
+        }
+        
+        .home-token {
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          cursor: pointer;
+          border: 2px solid transparent;
+          color: white;
+          text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+        }
+        
+        .home-token.in-home {
+          border-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .home-token.on-board {
+          border-color: #4CAF50;
+        }
+        
+        .home-token.selected {
+          border-color: #2196F3;
+          border-width: 3px;
+          transform: scale(1.1);
+        }
+        
+        .game-log {
+          background-color: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          border: 1px solid #ddd;
+        }
+        
+        .game-log h3 {
+          margin-bottom: 10px;
+          color: #333;
+        }
+        
+        .log-entries {
+          max-height: 150px;
+          overflow-y: auto;
+          background-color: white;
+          border-radius: 4px;
+          padding: 10px;
+          border: 1px solid #eee;
+        }
+        
+        .log-entry {
+          padding: 8px;
+          border-bottom: 1px solid #eee;
+          font-size: 0.9rem;
+        }
+        
+        .log-entry:last-child {
+          border-bottom: none;
+        }
+        
+        .game-rules {
+          background-color: #e8f4f8;
+          padding: 15px;
+          border-radius: 8px;
+          border-left: 4px solid #2196F3;
+        }
+        
+        .game-rules h3 {
+          margin-bottom: 10px;
+          color: #333;
+        }
+        
+        .game-rules ul {
+          padding-left: 20px;
+        }
+        
+        .game-rules li {
+          margin-bottom: 5px;
+          color: #555;
+        }
+        
+        @media (max-width: 992px) {
+          .game-area {
+            flex-direction: column;
+          }
+          
+          .board-cell {
+            width: 30px;
+            height: 30px;
+          }
+          
+          .token {
+            width: 12px;
+            height: 12px;
+            font-size: 8px;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .current-player-info {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          
+          .game-info {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+          }
+          
+          .controls {
+            align-items: stretch;
+          }
+          
+          .board-cell {
+            width: 25px;
+            height: 25px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default Contact;
+export default LudoGame;
