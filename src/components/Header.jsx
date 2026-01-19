@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'; 
 import { FaBars, FaTimes, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/Logo.jpeg'; // ✅ Your logo
+import logo from '../assets/vklogi.png'; // ✅ Your logo
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -158,3 +158,4 @@ const Header = () => {
 
 
 export default Header;
+
