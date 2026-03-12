@@ -18,6 +18,7 @@ const VideoStreamingPlatform = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const videoRefs = useRef({});
+  const mainVideoRef = useRef(null);
 
   const [videos, setVideos] = useState([
     {
@@ -85,26 +86,47 @@ const VideoStreamingPlatform = () => {
   const [selectedVideo, setSelectedVideo] = useState(videos[0]);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
 
-  // Stop currently playing video when selecting a new one
-  useEffect(() => {
-    if (currentlyPlaying && videoRefs.current[currentlyPlaying]) {
-      const videoElement = videoRefs.current[currentlyPlaying];
-      videoElement.pause();
-      videoElement.currentTime = 0;
+  // Function to play main video
+  const playMainVideo = () => {
+    if (mainVideoRef.current) {
+      // Reset video to start
+      mainVideoRef.current.currentTime = 0;
+      
+      // Play the video
+      const playPromise = mainVideoRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("Video playing successfully");
+          })
+          .catch(error => {
+            console.log("Autoplay prevented:", error);
+            // Some browsers require user interaction first
+            // We'll handle this by showing play button
+          });
+      }
     }
-  }, [currentlyPlaying]);
+  };
+
+  // Stop all thumbnail videos
+  const stopAllThumbnailVideos = () => {
+    Object.keys(videoRefs.current).forEach(key => {
+      const video = videoRefs.current[key];
+      if (video && !video.paused) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+  };
 
   const handleVideoClick = (video) => {
-    // Stop any currently playing video
-    if (currentlyPlaying && videoRefs.current[currentlyPlaying]) {
-      const previousVideo = videoRefs.current[currentlyPlaying];
-      previousVideo.pause();
-      previousVideo.currentTime = 0;
-    }
+    // Stop all thumbnail videos
+    stopAllThumbnailVideos();
 
-    // Set new selected video and play it immediately
+    // Set new selected video
     setSelectedVideo(video);
-    setCurrentlyPlaying(video.id);
+    setCurrentlyPlaying(null); // Reset currently playing thumbnail
     
     // Scroll to top for main video player on mobile
     if (window.innerWidth < 768) {
@@ -114,33 +136,44 @@ const VideoStreamingPlatform = () => {
     // Close mobile sidebar if open
     setIsSidebarOpen(false);
 
-    // Play the video immediately
+    // Play the main video after state update
     setTimeout(() => {
-      const mainVideoElement = document.querySelector('.main-video-player');
-      if (mainVideoElement) {
-        mainVideoElement.play().catch(error => {
-          console.log("Autoplay prevented:", error);
-        });
-      }
+      playMainVideo();
     }, 100);
   };
 
   const handleThumbnailVideoClick = (video, e) => {
     e.stopPropagation();
     
-    // Stop any currently playing thumbnail video
+    // Stop currently playing thumbnail video
     if (currentlyPlaying && videoRefs.current[currentlyPlaying]) {
       const previousVideo = videoRefs.current[currentlyPlaying];
       previousVideo.pause();
       previousVideo.currentTime = 0;
     }
 
-    // Play the clicked thumbnail video immediately
-    setCurrentlyPlaying(video.id);
-    const videoElement = e.target;
-    videoElement.play().catch(error => {
-      console.log("Thumbnail autoplay prevented:", error);
-    });
+    // Pause main video if it's playing
+    if (mainVideoRef.current && !mainVideoRef.current.paused) {
+      mainVideoRef.current.pause();
+    }
+
+    // Play the clicked thumbnail video
+    const videoElement = videoRefs.current[video.id];
+    if (videoElement) {
+      // Reset to start
+      videoElement.currentTime = 0;
+      
+      const playPromise = videoElement.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setCurrentlyPlaying(video.id);
+          })
+          .catch(error => {
+            console.log("Thumbnail autoplay prevented:", error);
+          });
+      }
+    }
   };
 
   const handleThumbnailVideoPause = (videoId, e) => {
@@ -150,7 +183,20 @@ const VideoStreamingPlatform = () => {
       videoElement.pause();
       videoElement.currentTime = 0;
     }
+    setCurrentlyPlaying(null);
   };
+
+  // Effect to handle main video playback when selectedVideo changes
+  useEffect(() => {
+    if (selectedVideo) {
+      // Small delay to ensure DOM is updated
+      const timer = setTimeout(() => {
+        playMainVideo();
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedVideo]);
 
   const toggleLike = (id) => {
     setVideos(videos.map(video =>
@@ -329,10 +375,13 @@ const VideoStreamingPlatform = () => {
                 <div className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl">
                   <div className="relative pt-[56.25%]"> {/* 16:9 Aspect Ratio */}
                     <video 
+                      ref={mainVideoRef}
                       controls 
                       autoPlay 
+                      playsInline // Important for mobile
                       className="absolute top-0 left-0 w-full h-full main-video-player rounded-2xl"
                       poster=""
+                      onError={(e) => console.log("Video error:", e)}
                     >
                       <source src={selectedVideo.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
@@ -384,6 +433,7 @@ const VideoStreamingPlatform = () => {
                         onClick={(e) => handleThumbnailVideoClick(video, e)}
                         onMouseLeave={(e) => handleThumbnailVideoPause(video.id, e)}
                         muted
+                        playsInline
                         preload="metadata"
                       >
                         <source src={video.videoUrl} type="video/mp4" />
@@ -437,6 +487,5 @@ const VideoStreamingPlatform = () => {
     </div>
   );
 };
-
 
 export default VideoStreamingPlatform;
