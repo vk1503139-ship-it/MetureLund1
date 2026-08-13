@@ -76,15 +76,15 @@ const getRandomQuestions = (category, count) => {
   return shuffled.slice(0, count);
 };
 
-// --- Build the complete question paper (50 questions) ---
+// --- Build the complete question paper (22 questions) ---
 const buildQuestionPaper = () => {
   const paper = [
-    ...getRandomQuestions(currentAffairs, 12),
-    ...getRandomQuestions(scienceQuestions, 12),
-    ...getRandomQuestions(mathQuestions, 6),
-    ...getRandomQuestions(reasoningQuestions, 6),
-    ...getRandomQuestions(socialScienceQuestions, 10),
-    ...getRandomQuestions(computerQuestions, 4),
+    ...getRandomQuestions(currentAffairs, 4),
+    ...getRandomQuestions(scienceQuestions, 4),
+    ...getRandomQuestions(mathQuestions, 4),
+    ...getRandomQuestions(reasoningQuestions, 4),
+    ...getRandomQuestions(socialScienceQuestions, 4),
+    ...getRandomQuestions(computerQuestions, 2),
   ];
   return paper.sort(() => Math.random() - 0.5); // Shuffle overall
 };
@@ -100,6 +100,7 @@ export default function BiharDarogaMockTest() {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(0);
+  const [resultDetails, setResultDetails] = useState([]);
 
   // Timer effect
   useEffect(() => {
@@ -115,10 +116,19 @@ export default function BiharDarogaMockTest() {
 
   const submitExam = () => {
     let s = 0;
-    questions.forEach((q, i) => {
-      if (answers[i] === q.answer) s++;
+    const details = questions.map((q, i) => {
+      const isCorrect = answers[i] === q.answer;
+      if (isCorrect) s++;
+      return {
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.answer,
+        userAnswer: answers[i] || "Not Attempted",
+        isCorrect: isCorrect,
+      };
     });
     setScore(s);
+    setResultDetails(details);
     setSubmitted(true);
   };
 
@@ -128,8 +138,8 @@ export default function BiharDarogaMockTest() {
       <div style={{ textAlign: "center", marginTop: "50px", fontFamily: "Arial, sans-serif" }}>
         <h1>📚 Bihar Daroga Mock Test</h1>
         <p style={{ fontSize: "18px", color: "#555" }}>
-          Total Questions: 50 <br />
-          (12 Current Affairs, 12 Science, 6 Math, 6 Reasoning, 10 Social Science, 4 Computer)
+          Total Questions: 22 <br />
+          (4 Current Affairs, 4 Science, 4 Math, 4 Reasoning, 4 Social Science, 2 Computer)
         </p>
         <p style={{ fontSize: "16px", color: "#777" }}>Time: 60 Minutes</p>
         <button
@@ -155,15 +165,85 @@ export default function BiharDarogaMockTest() {
   if (submitted) {
     const percentage = ((score / questions.length) * 100).toFixed(2);
     return (
-      <div style={{ textAlign: "center", marginTop: "50px", fontFamily: "Arial, sans-serif" }}>
-        <h1>✅ Result</h1>
-        <h2>
-          {score} / {questions.length}
-        </h2>
-        <h3>Percentage: {percentage}%</h3>
-        <p style={{ fontSize: "18px", marginTop: "20px" }}>
-          {percentage >= 60 ? "🎉 Congratulations! You passed." : "📖 Better luck next time. Keep practicing!"}
-        </p>
+      <div style={{ maxWidth: "900px", margin: "20px auto", padding: "20px", fontFamily: "Arial, sans-serif" }}>
+        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+          <h1>✅ Result</h1>
+          <h2>
+            {score} / {questions.length}
+          </h2>
+          <h3>Percentage: {percentage}%</h3>
+          <p style={{ fontSize: "18px", marginTop: "10px" }}>
+            {percentage >= 60 ? "🎉 Congratulations! You passed." : "📖 Better luck next time. Keep practicing!"}
+          </p>
+        </div>
+
+        {/* History/Details Section */}
+        <h2 style={{ borderBottom: "2px solid #333", paddingBottom: "10px" }}>📋 Answer History</h2>
+        {resultDetails.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              backgroundColor: item.isCorrect ? "#d4edda" : "#f8d7da",
+              borderLeft: `4px solid ${item.isCorrect ? "#28a745" : "#dc3545"}`,
+              padding: "15px",
+              marginBottom: "15px",
+              borderRadius: "5px",
+            }}
+          >
+            <h4>
+              Q{index + 1}: {item.question}
+            </h4>
+            <div style={{ marginLeft: "20px" }}>
+              <p>
+                <strong>Your Answer:</strong>{" "}
+                <span style={{ color: item.isCorrect ? "#28a745" : "#dc3545" }}>
+                  {item.userAnswer}
+                  {!item.isCorrect && " ❌"}
+                  {item.isCorrect && " ✅"}
+                </span>
+              </p>
+              {!item.isCorrect && (
+                <p>
+                  <strong>Correct Answer:</strong>{" "}
+                  <span style={{ color: "#28a745" }}>{item.correctAnswer}</span>
+                </p>
+              )}
+              <details>
+                <summary style={{ cursor: "pointer", color: "#007BFF" }}>View Options</summary>
+                <ul style={{ marginTop: "5px" }}>
+                  {item.options.map((opt, idx) => (
+                    <li key={idx} style={{ listStyle: "none" }}>
+                      {opt === item.correctAnswer && "✅ "}
+                      {opt === item.userAnswer && !item.isCorrect && "❌ "}
+                      {opt}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          </div>
+        ))}
+
+        <button
+          onClick={() => {
+            setStarted(false);
+            setSubmitted(false);
+            setAnswers({});
+            setResultDetails([]);
+          }}
+          style={{
+            padding: "12px 30px",
+            backgroundColor: "#007BFF",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontSize: "16px",
+            marginTop: "20px",
+          }}
+        >
+          🔄 Start New Test
+        </button>
       </div>
     );
   }
@@ -250,6 +330,27 @@ export default function BiharDarogaMockTest() {
         >
           📤 Submit
         </button>
+      </div>
+
+      {/* Question Navigator */}
+      <div style={{ marginTop: "30px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+        {questions.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrent(idx)}
+            style={{
+              padding: "8px 12px",
+              backgroundColor: answers[idx] ? "#28a745" : "#ccc",
+              color: answers[idx] ? "#fff" : "#333",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: current === idx ? "bold" : "normal",
+            }}
+          >
+            {idx + 1}
+          </button>
+        ))}
       </div>
     </div>
   );
