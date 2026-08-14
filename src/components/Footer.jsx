@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeart, FaArrowUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import logo from './assets/logo.png'; // Adjust the path according to your project structure
+import logo from './assets/logo.jpeg'; // Adjust the path according to your project structure
 
 const Footer = () => {
   const scrollToTop = () => {
