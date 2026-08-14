@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaPhone, FaEnvelope, FaMapMarkerAlt, FaHeart, FaArrowUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import logo from './assets/logo.png'; // Adjust the path according to your project structure
 
 const Footer = () => {
   const scrollToTop = () => {
@@ -14,11 +15,12 @@ const Footer = () => {
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           
-          {/* Company Info */}
+          {/* Company Info with Logo */}
           <div className="flex flex-col items-center md:items-start">
-            <div className="text-2xl font-bold text-purple-500 mb-4">
-              MATURELUND
-            </div>
+            <Link to="/" onClick={scrollToTop} className="flex items-center gap-3 mb-4">
+              <img src={logo} alt="Maturelund Logo" className="h-12 w-auto" />
+              <span className="text-2xl font-bold text-purple-500">MATURELUND</span>
+            </Link>
             <p className="text-gray-300 text-sm text-center md:text-left leading-relaxed">
               Your premier destination for entertainment content and community engagement.
             </p>
@@ -38,14 +40,14 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Navigation Links */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-lg font-bold mb-4 text-blue-400">Explore</h3>
+            <h3 className="text-lg font-bold mb-4 text-blue-400">Navigation</h3>
             <div className="flex flex-col space-y-3 text-center md:text-left">
-              <Link to="/" className="text-gray-300 hover:text-white transition duration-300">Home</Link>
-              <Link to="/content" className="text-gray-300 hover:text-white transition duration-300">Content</Link>
-              <Link to="/categories" className="text-gray-300 hover:text-white transition duration-300">Categories</Link>
-              <Link to="/premium" className="text-gray-300 hover:text-white transition duration-300">Premium</Link>
+              <Link to="/" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Home</Link>
+              <Link to="/mock-test" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Mock Test</Link>
+              <Link to="/about" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">About</Link>
+              <Link to="/contact" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Contact</Link>
             </div>
           </div>
 
@@ -53,21 +55,21 @@ const Footer = () => {
           <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-bold mb-4 text-green-400">Support</h3>
             <div className="flex flex-col space-y-3 text-center md:text-left">
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Help Center</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Contact Us</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">FAQ</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Community</span>
+              <Link to="/help" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Help Center</Link>
+              <Link to="/contact" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Contact Us</Link>
+              <Link to="/faq" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">FAQ</Link>
+              <Link to="/community" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Community</Link>
             </div>
           </div>
 
           {/* Legal */}
           <div className="flex flex-col items-center md:items-start">
             <h3 className="text-lg font-bold mb-4 text-yellow-400">Legal</h3>
-            <div className="flex flex-col space-y-4 text-center md:text-left">
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Terms of Service</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Privacy Policy</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Content Policy</span>
-              <span className="text-gray-300 hover:text-white cursor-pointer transition duration-300">Cookie Policy</span>
+            <div className="flex flex-col space-y-3 text-center md:text-left">
+              <Link to="/terms" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Terms of Service</Link>
+              <Link to="/privacy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Privacy Policy</Link>
+              <Link to="/content-policy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Content Policy</Link>
+              <Link to="/cookie-policy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Cookie Policy</Link>
             </div>
           </div>
         </div>
@@ -83,10 +85,10 @@ const Footer = () => {
 
             {/* Legal Links */}
             <div className="flex flex-wrap justify-center gap-4 text-gray-400 text-sm">
-              <span className="hover:text-white cursor-pointer transition duration-300">Privacy</span>
-              <span className="hover:text-white cursor-pointer transition duration-300">Terms</span>
-              <span className="hover:text-white cursor-pointer transition duration-300">Safety</span>
-              <span className="hover:text-white cursor-pointer transition duration-300">Support</span>
+              <Link to="/privacy" onClick={scrollToTop} className="hover:text-white transition duration-300">Privacy</Link>
+              <Link to="/terms" onClick={scrollToTop} className="hover:text-white transition duration-300">Terms</Link>
+              <Link to="/safety" onClick={scrollToTop} className="hover:text-white transition duration-300">Safety</Link>
+              <Link to="/contact" onClick={scrollToTop} className="hover:text-white transition duration-300">Support</Link>
             </div>
 
             {/* Scroll to Top */}
