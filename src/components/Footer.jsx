@@ -18,11 +18,11 @@ const Footer = () => {
           {/* Company Info with Logo */}
           <div className="flex flex-col items-center md:items-start">
             <Link to="/" onClick={scrollToTop} className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="Maturelund Logo" className="h-12 w-auto" />
-              <span className="text-2xl font-bold text-purple-500">MATURELUND</span>
+              <img src={logo} alt="Mock Test Logo" className="h-12 w-auto" />
+              <span className="text-2xl font-bold text-blue-500">MOCKTEST</span>
             </Link>
             <p className="text-gray-300 text-sm text-center md:text-left leading-relaxed">
-              Your premier destination for entertainment content and community engagement.
+              Your trusted platform for practice tests, exam preparation, and skill assessment.
             </p>
             <div className="flex space-x-3 mt-4">
               <a href="#" className="text-gray-400 hover:text-blue-500 transition duration-300">
@@ -40,36 +40,36 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Quick Links */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-lg font-bold mb-4 text-blue-400">Navigation</h3>
+            <h3 className="text-lg font-bold mb-4 text-blue-400">Quick Links</h3>
             <div className="flex flex-col space-y-3 text-center md:text-left">
               <Link to="/" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Home</Link>
               <Link to="/mock-test" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Mock Test</Link>
-              <Link to="/about" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">About</Link>
+              <Link to="/about" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">About Us</Link>
               <Link to="/contact" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Contact</Link>
+            </div>
+          </div>
+
+          {/* Exam Categories */}
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="text-lg font-bold mb-4 text-green-400">Exam Categories</h3>
+            <div className="flex flex-col space-y-3 text-center md:text-left">
+              <Link to="/exam/aptitude" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Aptitude Tests</Link>
+              <Link to="/exam/reasoning" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Reasoning Tests</Link>
+              <Link to="/exam/english" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">English Language</Link>
+              <Link to="/exam/technical" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Technical Tests</Link>
             </div>
           </div>
 
           {/* Support */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-lg font-bold mb-4 text-green-400">Support</h3>
+            <h3 className="text-lg font-bold mb-4 text-yellow-400">Support</h3>
             <div className="flex flex-col space-y-3 text-center md:text-left">
               <Link to="/help" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Help Center</Link>
               <Link to="/contact" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Contact Us</Link>
               <Link to="/faq" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">FAQ</Link>
-              <Link to="/community" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Community</Link>
-            </div>
-          </div>
-
-          {/* Legal */}
-          <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-lg font-bold mb-4 text-yellow-400">Legal</h3>
-            <div className="flex flex-col space-y-3 text-center md:text-left">
-              <Link to="/terms" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Terms of Service</Link>
               <Link to="/privacy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Privacy Policy</Link>
-              <Link to="/content-policy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Content Policy</Link>
-              <Link to="/cookie-policy" onClick={scrollToTop} className="text-gray-300 hover:text-white transition duration-300">Cookie Policy</Link>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ const Footer = () => {
             
             {/* Copyright */}
             <div className="text-gray-400 text-sm text-center md:text-left">
-              &copy; 2024 <span className="text-purple-400 font-semibold">Maturelund</span>. All rights reserved.
+              &copy; 2024 <span className="text-blue-400 font-semibold">MockTest</span>. All rights reserved.
             </div>
 
             {/* Legal Links */}
@@ -94,7 +94,7 @@ const Footer = () => {
             {/* Scroll to Top */}
             <button
               onClick={scrollToTop}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm transition duration-300"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition duration-300"
             >
               <FaArrowUp />
               Back to Top
